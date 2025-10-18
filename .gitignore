@@ -1,0 +1,19 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+
+# Environment variables / secrets
+.env
+
+# Streamlit cache
+.streamlit/
+
+# Logs and databases
+*.log
+*.db
