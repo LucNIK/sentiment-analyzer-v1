@@ -1,3 +1,6 @@
+#Author: NIKABOU NADJOMBE
+#Date: 2025-09-24
+
 import streamlit as st
 from transformers import pipeline
 from datetime import datetime

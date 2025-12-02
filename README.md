@@ -1,31 +1,39 @@
 Author: NIKABOU NADJOMBE
 Date: 2025-09-24
-# 🧠 Sentiment Analyzer Dashboard (v1)
+1️⃣ README.md
+# Sentiment Analyzer v1
 
-A professional, interactive Sentiment Analyzer built with **Streamlit** and **HuggingFace Transformers**.
+🧠 **AI-powered real-time sentiment analyzer** built with Python and Streamlit.  
+Visualizes sentiment as **POSITIVE, NEUTRAL, NEGATIVE**, shows **confidence scores**, and maintains a **history of analyzed sentences**.
 
-## Features v1
-- Analyze sentiment (POSITIVE/NEGATIVE/NEUTRAL) with emojis.
-- Horizontal KPI-style score bars.
-- Animated progress bar during analysis.
-- Sidebar history of previous analyses with timestamps.
-- Dark/Light theme toggle.
-- Modern UI with hover effects on buttons and input.
+---
+
+## Features
+
+- Real-time sentiment analysis using Hugging Face Transformers
+- Interactive **Streamlit dashboard**
+- Visual indicators:
+  - Emojis 😄😐😢 according to sentiment
+  - Horizontal KPI-style confidence bars
+- History panel to track previous analyses
+- Dark/light mode toggle
+- Clear input field after each submission
+
+---
 
 ## Installation
 
-1. Clone the repo:
-
+1. Clone this repository:
 ```bash
-git clone https://github.com/<nik552>/sentiment-analyzer.git
-cd sentiment-analyzer
-```
+git clone https://github.com/<your-username>/sentiment-analyzer.git
+cd sentiment-analyzer```
 
 
 Create a virtual environment (optional but recommended):
 
 python -m venv venv
-source venv/Scripts/activate   # Windows
+.\venv\Scripts\activate   # Windows
+source venv/bin/activate  # Mac/Linux
 
 
 Install dependencies:
@@ -33,12 +41,42 @@ Install dependencies:
 pip install -r requirements.txt
 
 
-Run the app:
+Make sure you have a Hugging Face token for private models (if needed):
 
+hf auth login
+
+Usage
 streamlit run app.py
 
-Notes
 
-Requires a HuggingFace token if using private models: https://huggingface.co/settings/tokens
+Enter a sentence in the input box
 
-Python 3.13+ recommended
+Click Analyze
+
+View sentiment, confidence bar, emoji, and history
+
+Dark/light mode toggle available in the sidebar
+
+Screenshots
+
+Requirements
+
+See requirements.txt for all dependencies.
+
+License
+
+MIT License
+
+
+---
+
+### **2️⃣ `requirements.txt`**
+
+```txt
+streamlit>=1.26.0
+transformers>=4.35.0
+torch>=2.1.0
+tensorflow>=2.14.0
+tf-keras>=2.14.0
+numpy>=1.26.0
+pandas>=2.1.0
