@@ -68,7 +68,7 @@ View sentiment, confidence bar, emoji, and history
 Dark/light mode toggle available in the sidebar
 ```
 Screenshots
-```bash
+
 ## Screenshots
 
 ### Main Interface
@@ -80,7 +80,7 @@ Screenshots
 ### Dark Mode
 ![Dark Mode](screenshots/dark_mode.png)
 
-```
+
 
 Tech Stack & Skills Demonstrated
 
