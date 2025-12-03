@@ -77,10 +77,6 @@ Screenshots
 ### History Panel
 ![History Panel](screenshots/history_panel.png)
 
-### Dark Mode
-![Dark Mode](screenshots/dark_mode.png)
-
-
 
 Tech Stack & Skills Demonstrated
 
