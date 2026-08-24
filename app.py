@@ -137,6 +137,14 @@ if submitted:
 # ----------- SIDEBAR -----------
 st.sidebar.title("📜 History")
 
+# ----------- ANALYSIS COUNT -----------
+analysis_count = len(st.session_state.history)
+
+st.sidebar.metric(
+    "📊 Analyses",
+    analysis_count
+)
+
 if st.session_state.history:
 
     if st.sidebar.button("🗑️ Clear History"):
