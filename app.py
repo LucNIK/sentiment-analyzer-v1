@@ -1,6 +1,7 @@
 # Author: NIKABOU NADJOMBE
 # Date: 2025-09-24
 
+import random
 import time
 from datetime import datetime
 
@@ -17,6 +18,20 @@ st.set_page_config(
 )
 
 MAX_TEXT_LENGTH = 500
+
+
+# ----------- EXAMPLE TEXTS -----------
+EXAMPLES = [
+    "I really love this application. It is fast and easy to use!",
+    "This application is excellent and works perfectly.",
+    "I am very happy with the results.",
+    "I am disappointed with this application.",
+    "This application is slow and difficult to use.",
+    "The experience was frustrating and confusing.",
+    "The application is available today.",
+    "The system processed the request successfully.",
+    "The weather is cloudy this morning."
+]
 
 
 # ----------- SENTIMENT STYLES -----------
@@ -73,13 +88,14 @@ classifier = load_classifier()
 st.title("🧠 Sentiment Analyzer")
 st.write("Enter a sentence to analyze its sentiment:")
 
+
 # ----------- EXAMPLES -----------
 st.markdown("### 💡 Examples")
 
-example_col1, example_col2 = st.columns(2)
+example_col1, example_col2, example_col3 = st.columns(3)
 
 with example_col1:
-    if st.button("😄 Positive Example"):
+    if st.button("😄 Positive"):
         st.session_state.example_text = (
             "I really love this application. "
             "It is fast and easy to use!"
@@ -87,11 +103,16 @@ with example_col1:
         st.rerun()
 
 with example_col2:
-    if st.button("😢 Negative Example"):
+    if st.button("😢 Negative"):
         st.session_state.example_text = (
             "I am disappointed with this application. "
             "It is slow and difficult to use."
         )
+        st.rerun()
+
+with example_col3:
+    if st.button("🎲 Random"):
+        st.session_state.example_text = random.choice(EXAMPLES)
         st.rerun()
 
 
