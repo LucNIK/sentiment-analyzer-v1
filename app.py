@@ -56,6 +56,9 @@ if "history" not in st.session_state:
 if "statistics_reset_at" not in st.session_state:
     st.session_state.statistics_reset_at = None
 
+if "example_text" not in st.session_state:
+    st.session_state.example_text = ""
+
 
 # ----------- CLASSIFIER -----------
 @st.cache_resource
@@ -70,9 +73,16 @@ classifier = load_classifier()
 st.title("🧠 Sentiment Analyzer")
 st.write("Enter a sentence to analyze its sentiment:")
 
+if st.button("💡 Try an example"):
+    st.session_state.example_text = (
+        "I really love this application. It is fast and easy to use!"
+    )
+
 with st.form("sentiment_form", clear_on_submit=True):
+
     user_input = st.text_area(
         "Your text:",
+        value=st.session_state.example_text,
         max_chars=MAX_TEXT_LENGTH,
         height=120
     )
@@ -91,6 +101,8 @@ with st.form("sentiment_form", clear_on_submit=True):
 # ----------- ANALYSIS -----------
 if submitted:
     user_input = user_input.strip()
+
+    st.session_state.example_text = ""
 
     if not user_input:
         st.warning("Please enter some text before analyzing.")
