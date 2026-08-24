@@ -73,11 +73,29 @@ classifier = load_classifier()
 st.title("🧠 Sentiment Analyzer")
 st.write("Enter a sentence to analyze its sentiment:")
 
-if st.button("💡 Try an example"):
-    st.session_state.example_text = (
-        "I really love this application. It is fast and easy to use!"
-    )
+# ----------- EXAMPLES -----------
+st.markdown("### 💡 Examples")
 
+example_col1, example_col2 = st.columns(2)
+
+with example_col1:
+    if st.button("😄 Positive Example"):
+        st.session_state.example_text = (
+            "I really love this application. "
+            "It is fast and easy to use!"
+        )
+        st.rerun()
+
+with example_col2:
+    if st.button("😢 Negative Example"):
+        st.session_state.example_text = (
+            "I am disappointed with this application. "
+            "It is slow and difficult to use."
+        )
+        st.rerun()
+
+
+# ----------- INPUT FORM -----------
 with st.form("sentiment_form", clear_on_submit=True):
 
     user_input = st.text_area(
