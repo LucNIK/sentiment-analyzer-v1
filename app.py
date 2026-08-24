@@ -113,6 +113,15 @@ with col3:
         st.rerun()
 
 
+# ----------- NEW ANALYSIS -----------
+if st.session_state.last_result:
+
+    if st.button("🔄 Analyze another text"):
+        st.session_state.example_text = ""
+        st.session_state.last_result = None
+        st.rerun()
+
+
 # ----------- INPUT FORM -----------
 with st.form("sentiment_form", clear_on_submit=True):
 
@@ -235,7 +244,7 @@ if submitted:
                 f"{analysis_time:.3f} seconds"
             )
 
-            # ----------- ANALYSIS SUMMARY -----------
+            # ----------- SUMMARY -----------
             st.markdown("### 📋 Analysis Summary")
 
             summary = (
@@ -251,7 +260,7 @@ if submitted:
                 language="text"
             )
 
-            # ----------- SAVE RESULT -----------
+            # ----------- LAST RESULT -----------
             st.session_state.last_result = {
                 "text": user_input,
                 "label": label,
