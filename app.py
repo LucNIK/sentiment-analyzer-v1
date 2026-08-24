@@ -47,9 +47,12 @@ def get_sentiment_style(label):
     )
 
 
-# ----------- HISTORY -----------
+# ----------- SESSION STATE -----------
 if "history" not in st.session_state:
     st.session_state.history = []
+
+if "statistics_reset_at" not in st.session_state:
+    st.session_state.statistics_reset_at = None
 
 
 # ----------- CLASSIFIER -----------
@@ -67,6 +70,10 @@ st.write("Enter a sentence to analyze its sentiment:")
 
 with st.form("sentiment_form", clear_on_submit=True):
     user_input = st.text_input("Your text:")
+
+    # Character counter
+    st.caption(f"Characters: {len(user_input)}")
+
     submitted = st.form_submit_button("Analyze")
 
 
@@ -122,7 +129,8 @@ if submitted:
                     "text": user_input,
                     "label": label,
                     "score": score,
-                    "time": datetime.now().strftime("%H:%M:%S")
+                    "time": datetime.now().strftime("%H:%M:%S"),
+                    "created_at": datetime.now()
                 }
             )
 
@@ -137,8 +145,35 @@ if submitted:
 # ----------- SIDEBAR -----------
 st.sidebar.title("📜 History")
 
-analysis_count = len(st.session_state.history)
+if st.session_state.statistics_reset_at:
+    statistics_history = [
+        item
+        for item in st.session_state.history
+        if item["created_at"] > st.session_state.statistics_reset_at
+    ]
+else:
+    statistics_history = st.session_state.history
 
+
+analysis_count = len(statistics_history)
+
+positive_count = sum(
+    item["label"] == "POSITIVE"
+    for item in statistics_history
+)
+
+negative_count = sum(
+    item["label"] == "NEGATIVE"
+    for item in statistics_history
+)
+
+neutral_count = sum(
+    item["label"] == "NEUTRAL"
+    for item in statistics_history
+)
+
+
+# ----------- ANALYSIS COUNTER -----------
 st.sidebar.metric(
     "📊 Analyses",
     analysis_count
@@ -146,26 +181,17 @@ st.sidebar.metric(
 
 
 # ----------- SENTIMENT STATISTICS -----------
-positive_count = sum(
-    item["label"] == "POSITIVE"
-    for item in st.session_state.history
-)
-
-negative_count = sum(
-    item["label"] == "NEGATIVE"
-    for item in st.session_state.history
-)
-
-neutral_count = sum(
-    item["label"] == "NEUTRAL"
-    for item in st.session_state.history
-)
-
 st.sidebar.markdown("### 📈 Sentiment Statistics")
 
 st.sidebar.markdown(f"😄 **Positive:** {positive_count}")
 st.sidebar.markdown(f"😢 **Negative:** {negative_count}")
 st.sidebar.markdown(f"😐 **Neutral:** {neutral_count}")
+
+
+# ----------- RESET STATISTICS -----------
+if st.sidebar.button("🔄 Reset Statistics"):
+    st.session_state.statistics_reset_at = datetime.now()
+    st.rerun()
 
 
 # ----------- LAST ANALYSIS -----------
@@ -201,6 +227,7 @@ if st.session_state.history:
 
     if st.sidebar.button("🗑️ Clear History"):
         st.session_state.history.clear()
+        st.session_state.statistics_reset_at = None
         st.rerun()
 
     for item in reversed(st.session_state.history):
