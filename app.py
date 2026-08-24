@@ -163,17 +163,37 @@ neutral_count = sum(
 
 st.sidebar.markdown("### 📈 Sentiment Statistics")
 
-st.sidebar.markdown(
-    f"😄 **Positive:** {positive_count}"
-)
+st.sidebar.markdown(f"😄 **Positive:** {positive_count}")
+st.sidebar.markdown(f"😢 **Negative:** {negative_count}")
+st.sidebar.markdown(f"😐 **Neutral:** {neutral_count}")
 
-st.sidebar.markdown(
-    f"😢 **Negative:** {negative_count}"
-)
 
-st.sidebar.markdown(
-    f"😐 **Neutral:** {neutral_count}"
-)
+# ----------- LAST ANALYSIS -----------
+if st.session_state.history:
+    last_analysis = st.session_state.history[-1]
+    last_style = get_sentiment_style(last_analysis["label"])
+
+    st.sidebar.markdown("### 🔎 Last Analysis")
+
+    st.sidebar.markdown(
+        f"""
+        <div style="
+            padding:10px;
+            border-left:4px solid {last_style['color']};
+            border-radius:6px;
+            background-color:rgba(128,128,128,0.08);
+        ">
+            <strong>
+                {last_style['emoji']} {last_analysis['label']}
+            </strong>
+            <br>
+            Confidence: {last_analysis['score'] * 100:.1f}%
+            <br>
+            <small>{last_analysis['time']}</small>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # ----------- CLEAR HISTORY -----------
