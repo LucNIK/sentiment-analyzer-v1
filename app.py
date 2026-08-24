@@ -16,6 +16,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+MAX_TEXT_LENGTH = 500
+
 
 # ----------- SENTIMENT STYLES -----------
 def get_sentiment_style(label):
@@ -69,13 +71,17 @@ st.title("🧠 Sentiment Analyzer")
 st.write("Enter a sentence to analyze its sentiment:")
 
 with st.form("sentiment_form", clear_on_submit=True):
-    user_input = st.text_input("Your text:")
+    user_input = st.text_area(
+        "Your text:",
+        max_chars=MAX_TEXT_LENGTH,
+        height=120
+    )
 
     character_count = len(user_input)
     word_count = len(user_input.split())
 
     st.caption(
-        f"Characters: {character_count} | "
+        f"Characters: {character_count}/{MAX_TEXT_LENGTH} | "
         f"Words: {word_count}"
     )
 
@@ -88,6 +94,13 @@ if submitted:
 
     if not user_input:
         st.warning("Please enter some text before analyzing.")
+
+    elif len(user_input) > MAX_TEXT_LENGTH:
+        st.error(
+            f"Text is too long. Please keep it under "
+            f"{MAX_TEXT_LENGTH} characters."
+        )
+
     else:
         try:
             progress_bar = st.progress(0)
@@ -283,8 +296,8 @@ else:
 st.markdown(
     """
     <style>
-        .stTextInput>div>div>input {
-            height: 2.8rem;
+        .stTextInput>div>div>input,
+        .stTextArea textarea {
             font-size: 1.1rem;
             padding-left: 10px;
             border-radius: 10px;
