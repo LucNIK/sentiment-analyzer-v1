@@ -8,7 +8,7 @@ import streamlit as st
 from transformers import pipeline
 
 
-# ----------- CONFIG STREAMLIT -----------
+# ----------- CONFIGURATION -----------
 st.set_page_config(
     page_title="🧠 Sentiment Analyzer",
     page_icon="🧠",
@@ -17,9 +17,8 @@ st.set_page_config(
 )
 
 
-# ----------- SENTIMENT HELPERS -----------
+# ----------- SENTIMENT STYLES -----------
 def get_sentiment_style(label):
-    """Return the emoji, color and message for a sentiment."""
     styles = {
         "POSITIVE": {
             "emoji": "😄",
@@ -48,22 +47,21 @@ def get_sentiment_style(label):
     )
 
 
-# ----------- HISTORIQUE -----------
+# ----------- HISTORY -----------
 if "history" not in st.session_state:
     st.session_state.history = []
 
 
-# ----------- HUGGING FACE PIPELINE -----------
+# ----------- CLASSIFIER -----------
 @st.cache_resource
 def load_classifier():
-    """Load and cache the sentiment analysis pipeline."""
     return pipeline("sentiment-analysis")
 
 
 classifier = load_classifier()
 
 
-# ----------- INTERFACE PRINCIPALE -----------
+# ----------- MAIN INTERFACE -----------
 st.title("🧠 Sentiment Analyzer")
 st.write("Enter a sentence to analyze its sentiment:")
 
@@ -72,7 +70,7 @@ with st.form("sentiment_form", clear_on_submit=True):
     submitted = st.form_submit_button("Analyze")
 
 
-# ----------- ANALYSE -----------
+# ----------- ANALYSIS -----------
 if submitted:
     user_input = user_input.strip()
 
@@ -80,7 +78,6 @@ if submitted:
         st.warning("Please enter some text before analyzing.")
     else:
         try:
-            # ----------- PROGRESSION -----------
             progress_bar = st.progress(0)
             status_text = st.empty()
 
@@ -92,34 +89,25 @@ if submitted:
             progress_bar.empty()
             status_text.empty()
 
-            # ----------- SENTIMENT -----------
             result = classifier(user_input)[0]
 
             label = result["label"].upper()
             score = result["score"]
 
-            # ----------- STYLE -----------
             sentiment = get_sentiment_style(label)
 
-            emoji = sentiment["emoji"]
-            color = sentiment["color"]
-            message = sentiment["message"]
-
-            # ----------- RESULTAT -----------
             st.markdown(
                 f"""
                 <div style="
-                    padding: 20px;
-                    border-radius: 12px;
-                    border-left: 6px solid {color};
-                    background-color: rgba(128,128,128,0.08);
+                    padding:20px;
+                    border-radius:12px;
+                    border-left:6px solid {sentiment['color']};
+                    background-color:rgba(128,128,128,0.08);
                 ">
-                    <h2 style="color:{color}; margin-bottom:5px;">
-                        {emoji} {label}
+                    <h2 style="color:{sentiment['color']};">
+                        {sentiment['emoji']} {label}
                     </h2>
-                    <p style="font-size:1.1rem; margin:0;">
-                        {message}
-                    </p>
+                    <p>{sentiment['message']}</p>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -129,7 +117,6 @@ if submitted:
             st.progress(score)
             st.markdown(f"**{score * 100:.1f}%**")
 
-            # ----------- HISTORIQUE -----------
             st.session_state.history.append(
                 {
                     "text": user_input,
@@ -147,18 +134,23 @@ if submitted:
             st.caption(f"Error details: {error}")
 
 
-# ----------- SIDEBAR HISTORIQUE -----------
+# ----------- SIDEBAR -----------
 st.sidebar.title("📜 History")
 
 if st.session_state.history:
+
+    if st.sidebar.button("🗑️ Clear History"):
+        st.session_state.history.clear()
+        st.rerun()
+
     for item in reversed(st.session_state.history):
 
-        item_style = get_sentiment_style(item["label"])
+        style = get_sentiment_style(item["label"])
 
         st.sidebar.markdown(
             f"""
-            <p style="color:{item_style['color']}; margin:0;">
-                {item_style['emoji']} {item['time']} |
+            <p style="color:{style['color']}; margin:0;">
+                {style['emoji']} {item['time']} |
                 {item['label']} ({item['score'] * 100:.1f}%)
             </p>
             <p style="margin-left:10px;">
@@ -168,6 +160,7 @@ if st.session_state.history:
             """,
             unsafe_allow_html=True
         )
+
 else:
     st.sidebar.write(
         "No history yet. Submit a sentence to see it here."
@@ -191,7 +184,6 @@ st.markdown(
             font-size: 1.1rem;
             padding: 10px 20px;
             border-radius: 8px;
-            transition: 0.3s;
         }
 
         .stButton>button:hover {
@@ -201,14 +193,6 @@ st.markdown(
 
         .stProgress>div>div>div>div {
             background-color: #4CAF50;
-        }
-
-        .css-18e3th9 {
-            padding-top: 2rem;
-        }
-
-        .css-1d391kg {
-            padding-top: 1rem;
         }
     </style>
     """,
