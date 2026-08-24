@@ -20,7 +20,7 @@ st.set_page_config(
 MAX_TEXT_LENGTH = 500
 
 
-# ----------- EXAMPLE TEXTS -----------
+# ----------- EXAMPLES -----------
 EXAMPLES = [
     "I really love this application. It is fast and easy to use!",
     "This application is excellent and works perfectly.",
@@ -74,6 +74,9 @@ if "statistics_reset_at" not in st.session_state:
 if "example_text" not in st.session_state:
     st.session_state.example_text = ""
 
+if "last_result" not in st.session_state:
+    st.session_state.last_result = None
+
 
 # ----------- CLASSIFIER -----------
 @st.cache_resource
@@ -89,28 +92,22 @@ st.title("🧠 Sentiment Analyzer")
 st.write("Enter a sentence to analyze its sentiment:")
 
 
-# ----------- EXAMPLES -----------
-st.markdown("### 💡 Examples")
+# ----------- QUICK EXAMPLES -----------
+st.markdown("### 💡 Quick Examples")
 
-example_col1, example_col2, example_col3 = st.columns(3)
+col1, col2, col3 = st.columns(3)
 
-with example_col1:
+with col1:
     if st.button("😄 Positive"):
-        st.session_state.example_text = (
-            "I really love this application. "
-            "It is fast and easy to use!"
-        )
+        st.session_state.example_text = EXAMPLES[0]
         st.rerun()
 
-with example_col2:
+with col2:
     if st.button("😢 Negative"):
-        st.session_state.example_text = (
-            "I am disappointed with this application. "
-            "It is slow and difficult to use."
-        )
+        st.session_state.example_text = EXAMPLES[4]
         st.rerun()
 
-with example_col3:
+with col3:
     if st.button("🎲 Random"):
         st.session_state.example_text = random.choice(EXAMPLES)
         st.rerun()
@@ -129,9 +126,16 @@ with st.form("sentiment_form", clear_on_submit=True):
     character_count = len(user_input)
     word_count = len(user_input.split())
 
+    percentage = min(
+        character_count / MAX_TEXT_LENGTH,
+        1.0
+    )
+
+    st.progress(percentage)
+
     st.caption(
-        f"Characters: {character_count}/{MAX_TEXT_LENGTH} | "
-        f"Words: {word_count}"
+        f"📝 {word_count} words • "
+        f"{character_count}/{MAX_TEXT_LENGTH} characters"
     )
 
     submitted = st.form_submit_button("Analyze")
@@ -139,28 +143,40 @@ with st.form("sentiment_form", clear_on_submit=True):
 
 # ----------- ANALYSIS -----------
 if submitted:
+
     user_input = user_input.strip()
 
     st.session_state.example_text = ""
 
     if not user_input:
-        st.warning("Please enter some text before analyzing.")
+
+        st.warning(
+            "Please enter some text before analyzing."
+        )
 
     elif len(user_input) > MAX_TEXT_LENGTH:
+
         st.error(
             f"Text is too long. Please keep it under "
             f"{MAX_TEXT_LENGTH} characters."
         )
 
     else:
+
         try:
+
             progress_bar = st.progress(0)
             status_text = st.empty()
 
             for percent in range(0, 101, 10):
+
                 time.sleep(0.05)
+
                 progress_bar.progress(percent)
-                status_text.text(f"Analyzing... {percent}%")
+
+                status_text.text(
+                    f"Analyzing... {percent}%"
+                )
 
             progress_bar.empty()
             status_text.empty()
@@ -169,71 +185,130 @@ if submitted:
 
             result = classifier(user_input)[0]
 
-            analysis_time = time.perf_counter() - analysis_start
+            analysis_time = (
+                time.perf_counter()
+                - analysis_start
+            )
 
             label = result["label"].upper()
             score = result["score"]
 
             sentiment = get_sentiment_style(label)
 
+            # ----------- RESULT -----------
             st.markdown(
                 f"""
                 <div style="
                     padding:20px;
                     border-radius:12px;
-                    border-left:6px solid {sentiment['color']};
-                    background-color:rgba(128,128,128,0.08);
+                    border-left:6px solid
+                    {sentiment['color']};
+                    background-color:
+                    rgba(128,128,128,0.08);
                 ">
-                    <h2 style="color:{sentiment['color']};">
+
+                    <h2 style="
+                        color:{sentiment['color']};
+                    ">
                         {sentiment['emoji']} {label}
                     </h2>
-                    <p>{sentiment['message']}</p>
+
+                    <p>
+                        {sentiment['message']}
+                    </p>
+
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
             st.markdown("### Confidence")
-            st.progress(score)
-            st.markdown(f"**{score * 100:.1f}%**")
 
-            st.caption(
-                f"⚡ Analysis completed in {analysis_time:.3f} seconds"
+            st.progress(score)
+
+            st.markdown(
+                f"**{score * 100:.1f}%**"
             )
 
+            st.caption(
+                f"⚡ Analysis completed in "
+                f"{analysis_time:.3f} seconds"
+            )
+
+            # ----------- ANALYSIS SUMMARY -----------
+            st.markdown("### 📋 Analysis Summary")
+
+            summary = (
+                f"Sentiment: {label}\n"
+                f"Confidence: {score * 100:.1f}%\n"
+                f"Words: {len(user_input.split())}\n"
+                f"Characters: {len(user_input)}\n"
+                f"Analysis time: {analysis_time:.3f}s"
+            )
+
+            st.code(
+                summary,
+                language="text"
+            )
+
+            # ----------- SAVE RESULT -----------
+            st.session_state.last_result = {
+                "text": user_input,
+                "label": label,
+                "score": score,
+                "analysis_time": analysis_time
+            }
+
+            # ----------- HISTORY -----------
             st.session_state.history.append(
                 {
                     "text": user_input,
                     "label": label,
                     "score": score,
-                    "time": datetime.now().strftime("%H:%M:%S"),
+                    "time": datetime.now().strftime(
+                        "%H:%M:%S"
+                    ),
                     "created_at": datetime.now(),
                     "analysis_time": analysis_time
                 }
             )
 
         except Exception as error:
+
             st.error(
-                "An error occurred while analyzing the text. "
-                "Please try again."
+                "An error occurred while analyzing "
+                "the text. Please try again."
             )
-            st.caption(f"Error details: {error}")
+
+            st.caption(
+                f"Error details: {error}"
+            )
 
 
 # ----------- SIDEBAR -----------
 st.sidebar.title("📜 History")
 
+
+# ----------- STATISTICS DATA -----------
 if st.session_state.statistics_reset_at:
+
     statistics_history = [
         item
         for item in st.session_state.history
-        if item["created_at"] > st.session_state.statistics_reset_at
+        if item["created_at"]
+        > st.session_state.statistics_reset_at
     ]
+
 else:
-    statistics_history = st.session_state.history
+
+    statistics_history = (
+        st.session_state.history
+    )
 
 
-analysis_count = len(statistics_history)
+analysis_count = len(
+    statistics_history
+)
 
 positive_count = sum(
     item["label"] == "POSITIVE"
@@ -251,60 +326,94 @@ neutral_count = sum(
 )
 
 
-# ----------- ANALYSIS COUNTER -----------
+# ----------- COUNTER -----------
 st.sidebar.metric(
     "📊 Analyses",
     analysis_count
 )
 
 
-# ----------- SENTIMENT STATISTICS -----------
-st.sidebar.markdown("### 📈 Sentiment Statistics")
+# ----------- STATISTICS -----------
+st.sidebar.markdown(
+    "### 📈 Sentiment Statistics"
+)
 
-st.sidebar.markdown(f"😄 **Positive:** {positive_count}")
-st.sidebar.markdown(f"😢 **Negative:** {negative_count}")
-st.sidebar.markdown(f"😐 **Neutral:** {neutral_count}")
+st.sidebar.markdown(
+    f"😄 **Positive:** {positive_count}"
+)
+
+st.sidebar.markdown(
+    f"😢 **Negative:** {negative_count}"
+)
+
+st.sidebar.markdown(
+    f"😐 **Neutral:** {neutral_count}"
+)
 
 
 # ----------- RESET STATISTICS -----------
-if st.sidebar.button("🔄 Reset Statistics"):
-    st.session_state.statistics_reset_at = datetime.now()
+if st.sidebar.button(
+    "🔄 Reset Statistics"
+):
+
+    st.session_state.statistics_reset_at = (
+        datetime.now()
+    )
+
     st.rerun()
 
 
-# ----------- LAST ANALYSIS -----------
-if st.session_state.history:
-    last_analysis = st.session_state.history[-1]
-    last_style = get_sentiment_style(last_analysis["label"])
+# ----------- LAST RESULT -----------
+if st.session_state.last_result:
 
-    last_text = last_analysis["text"]
-    last_characters = len(last_text)
-    last_words = len(last_text.split())
-    last_analysis_time = last_analysis.get("analysis_time", 0)
+    last_result = (
+        st.session_state.last_result
+    )
 
-    st.sidebar.markdown("### 🔎 Last Analysis")
+    last_style = get_sentiment_style(
+        last_result["label"]
+    )
+
+    st.sidebar.markdown(
+        "### 🔎 Last Analysis"
+    )
 
     st.sidebar.markdown(
         f"""
         <div style="
             padding:10px;
-            border-left:4px solid {last_style['color']};
+            border-left:4px solid
+            {last_style['color']};
             border-radius:6px;
-            background-color:rgba(128,128,128,0.08);
+            background-color:
+            rgba(128,128,128,0.08);
         ">
+
             <strong>
-                {last_style['emoji']} {last_analysis['label']}
+                {last_style['emoji']}
+                {last_result['label']}
             </strong>
+
             <br>
-            Confidence: {last_analysis['score'] * 100:.1f}%
+
+            Confidence:
+            {last_result['score'] * 100:.1f}%
+
             <br>
-            Characters: {last_characters}
+
+            Characters:
+            {len(last_result['text'])}
+
             <br>
-            Words: {last_words}
+
+            Words:
+            {len(last_result['text'].split())}
+
             <br>
-            Analysis time: {last_analysis_time:.3f}s
-            <br>
-            <small>{last_analysis['time']}</small>
+
+            Analysis time:
+            {last_result['analysis_time']:.3f}s
+
         </div>
         """,
         unsafe_allow_html=True
@@ -314,32 +423,58 @@ if st.session_state.history:
 # ----------- CLEAR HISTORY -----------
 if st.session_state.history:
 
-    if st.sidebar.button("🗑️ Clear History"):
+    if st.sidebar.button(
+        "🗑️ Clear History"
+    ):
+
         st.session_state.history.clear()
-        st.session_state.statistics_reset_at = None
+
+        st.session_state.last_result = None
+
+        st.session_state.statistics_reset_at = (
+            None
+        )
+
         st.rerun()
 
-    for item in reversed(st.session_state.history):
+    for item in reversed(
+        st.session_state.history
+    ):
 
-        style = get_sentiment_style(item["label"])
+        style = get_sentiment_style(
+            item["label"]
+        )
 
         st.sidebar.markdown(
             f"""
-            <p style="color:{style['color']}; margin:0;">
-                {style['emoji']} {item['time']} |
-                {item['label']} ({item['score'] * 100:.1f}%)
+            <p style="
+                color:{style['color']};
+                margin:0;
+            ">
+                {style['emoji']}
+                {item['time']} |
+                {item['label']}
+                ({item['score'] * 100:.1f}%)
             </p>
-            <p style="margin-left:10px;">
+
+            <p style="
+                margin-left:10px;
+            ">
                 {item['text']}
             </p>
-            <hr style="border:1px solid #ccc;">
+
+            <hr style="
+                border:1px solid #ccc;
+            ">
             """,
             unsafe_allow_html=True
         )
 
 else:
+
     st.sidebar.write(
-        "No history yet. Submit a sentence to see it here."
+        "No history yet. Submit a sentence "
+        "to see it here."
     )
 
 
@@ -347,29 +482,46 @@ else:
 st.markdown(
     """
     <style>
+
         .stTextInput>div>div>input,
         .stTextArea textarea {
-            font-size: 1.1rem;
-            padding-left: 10px;
-            border-radius: 10px;
+
+            font-size:1.1rem;
+
+            padding-left:10px;
+
+            border-radius:10px;
+
         }
 
         .stButton>button {
-            background-color: #4CAF50;
-            color: white;
-            font-size: 1.1rem;
-            padding: 10px 20px;
-            border-radius: 8px;
+
+            background-color:#4CAF50;
+
+            color:white;
+
+            font-size:1.1rem;
+
+            padding:10px 20px;
+
+            border-radius:8px;
+
         }
 
         .stButton>button:hover {
-            background-color: #45a049;
-            cursor: pointer;
+
+            background-color:#45a049;
+
+            cursor:pointer;
+
         }
 
         .stProgress>div>div>div>div {
-            background-color: #4CAF50;
+
+            background-color:#4CAF50;
+
         }
+
     </style>
     """,
     unsafe_allow_html=True
