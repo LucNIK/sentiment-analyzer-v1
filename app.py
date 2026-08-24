@@ -137,7 +137,6 @@ if submitted:
 # ----------- SIDEBAR -----------
 st.sidebar.title("📜 History")
 
-# ----------- ANALYSIS COUNT -----------
 analysis_count = len(st.session_state.history)
 
 st.sidebar.metric(
@@ -145,6 +144,39 @@ st.sidebar.metric(
     analysis_count
 )
 
+
+# ----------- SENTIMENT STATISTICS -----------
+positive_count = sum(
+    item["label"] == "POSITIVE"
+    for item in st.session_state.history
+)
+
+negative_count = sum(
+    item["label"] == "NEGATIVE"
+    for item in st.session_state.history
+)
+
+neutral_count = sum(
+    item["label"] == "NEUTRAL"
+    for item in st.session_state.history
+)
+
+st.sidebar.markdown("### 📈 Sentiment Statistics")
+
+st.sidebar.markdown(
+    f"😄 **Positive:** {positive_count}"
+)
+
+st.sidebar.markdown(
+    f"😢 **Negative:** {negative_count}"
+)
+
+st.sidebar.markdown(
+    f"😐 **Neutral:** {neutral_count}"
+)
+
+
+# ----------- CLEAR HISTORY -----------
 if st.session_state.history:
 
     if st.sidebar.button("🗑️ Clear History"):
