@@ -1,4 +1,4 @@
-# Author: NIKABOU NADJOMBE
+# Author: NIKABOU NADJOMBE-CHY
 # Date: 2025-09-24
 
 import random
